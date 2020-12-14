@@ -28,10 +28,11 @@ public class FileSystem {
             }
         }
 
-        Node node = file.getFirstNode();
-        while (node != null) {
-            diskSegment[node.getNumber()].setSegmentStatus(status.pick);
-            node = node.getNext();
+        INode node = file.getFirstNode();
+        int i = 0;
+        while (node.get(i) != -1) {
+            diskSegment[node.get(i)].setSegmentStatus(status.pick);
+            i++;
         }
     }
 
@@ -93,7 +94,7 @@ public class FileSystem {
             if (fileSectorSize == 0) {
                 fileSectorSize = 1;
             }
-            file.setFirstNode(addInDisk(fileSectorSize, new Node()));
+            file.setFirstNode(addInDisk(fileSectorSize, new INode()));
         }
 
 
@@ -144,12 +145,12 @@ public class FileSystem {
     }
 
     public void deleteFromDisk(File file) {
-        Node node = file.getFirstNode();
+        INode node = file.getFirstNode();
 
-        while (node != null) {
-            diskSegment[node.getNumber()].setSegmentStatus(status.free);
+        while (node.getSize() != 0) {
+            int num =node.delete();
+            diskSegment[num].setSegmentStatus(status.free);
             disk.addFreeSegment();
-            node = node.getNext();
         }
 
     }
@@ -166,7 +167,7 @@ public class FileSystem {
 
         if (catalog.addFile(file)) {
             deleteObject(treeManager.getParentPickObject(catalog), moveObjectForMove);
-            file.setFirstNode(addInDisk(fileSectorSize, new Node()));
+            file.setFirstNode(addInDisk(fileSectorSize, new INode()));
             treeManager.addFile(catalog, file);
             return "Файл " + file.getName() + " успешно создан в каталоге " + catalog.getName();
         }
@@ -191,7 +192,7 @@ public class FileSystem {
             return "Недостаточно места на диске для создания данного файла";
         }
         if (catalog.addFile(file)) {
-            file.setFirstNode(addInDisk(fileSectorSize,new Node()));
+            file.setFirstNode(addInDisk(fileSectorSize,new INode()));
             treeManager.addFile(catalog, file);
             return "Файл " + file.getName() + " успешно создан в каталоге " + catalog.getName();
 
@@ -201,24 +202,19 @@ public class FileSystem {
 
     }
 
-    private Node addInDisk(int fileSectorSize, Node node) {
+    private INode addInDisk(int fileSectorSize, INode node) {
         int index;
-        boolean added = false;
-        while (fileSectorSize > 0 && !added) {
+        while (fileSectorSize > 0 ) {
             index = getRandomNumber(disk.getSegmentAmount() - 1);
             if (diskSegment[index].getSegmentStatus() == status.free) {
-                added = true;
+
                 disk.deleteFreeSegment();
-                node.setNumber(index);
+                node.add(index);
                 diskSegment[index].setSegmentStatus(status.occupied);
                 fileSectorSize--;
-                Node newNodeNext = new Node();
-                node.setNext(addInDisk(fileSectorSize, newNodeNext));
-
-                return node;
             }
         }
-        return null;
+        return node;
     }
 
 

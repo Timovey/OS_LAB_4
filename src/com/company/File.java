@@ -2,7 +2,7 @@ package com.company;
 
 public class File extends StoredObject {
     private int size;
-    private Node firstNode;
+    private INode firstNode;
 
 
     public File (StoredObject storedObject, int size) {
@@ -26,11 +26,11 @@ public class File extends StoredObject {
         this.size = size;
     }
 
-    public Node getFirstNode() {
+    public INode getFirstNode() {
         return firstNode;
     }
 
-    public void setFirstNode(Node firstNode) {
+    public void setFirstNode(INode firstNode) {
         this.firstNode = firstNode;
     }
 }
