@@ -1,6 +1,5 @@
 package com.company;
 
-import java.util.ArrayList;
 
 public class INode {
     private int[] elements;
@@ -13,8 +12,11 @@ public class INode {
     }
 
     public void add(int num) {
-        if(size >= elements.length) {
+        if(size == elements.length && next == null) {
             next = new INode();
+            next.add(num);
+        }
+        else if(size == elements.length && next != null) {
             next.add(num);
         }
         else {
